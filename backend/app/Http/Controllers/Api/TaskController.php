@@ -4,23 +4,42 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Task;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 
 class TaskController extends Controller
 {
     /**
+     * Get or create demo user for testing
+     */
+    private function getDemoUser(): User
+    {
+        // For demo purposes, create or get a demo user
+        return User::firstOrCreate(
+            ['email' => 'demo@example.com'],
+            [
+                'name' => 'Demo User',
+                'email' => 'demo@example.com',
+                'password' => bcrypt('password'),
+                'plan' => 'free'
+            ]
+        );
+    }
+
+    /**
      * Display a listing of the resource.
      */
     public function index(Request $request): JsonResponse
     {
-        $tasks = $request->user()->tasks()->orderBy('created_at', 'desc')->get();
+        $user = $request->user() ?? $this->getDemoUser();
+        $tasks = $user->tasks()->orderBy('created_at', 'desc')->get();
         
         return response()->json([
             'tasks' => $tasks,
             'total_tasks' => $tasks->count(),
-            'task_limit' => $request->user()->getTaskLimit(),
-            'remaining_tasks' => $request->user()->getTaskLimit() - $tasks->count(),
+            'task_limit' => $user->getTaskLimit(),
+            'remaining_tasks' => $user->getTaskLimit() - $tasks->count(),
         ]);
     }
 
@@ -29,7 +48,7 @@ class TaskController extends Controller
      */
     public function store(Request $request): JsonResponse
     {
-        $user = $request->user();
+        $user = $request->user() ?? $this->getDemoUser();
         
         // Check task limit for free users
         if (!$user->isPro() && $user->tasks()->count() >= 5) {
@@ -61,8 +80,10 @@ class TaskController extends Controller
      */
     public function show(Task $task, Request $request): JsonResponse
     {
+        $user = $request->user() ?? $this->getDemoUser();
+        
         // Ensure user can only access their own tasks
-        if ($task->user_id !== $request->user()->id) {
+        if ($task->user_id !== $user->id) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
@@ -74,8 +95,10 @@ class TaskController extends Controller
      */
     public function update(Request $request, Task $task): JsonResponse
     {
+        $user = $request->user() ?? $this->getDemoUser();
+        
         // Ensure user can only update their own tasks
-        if ($task->user_id !== $request->user()->id) {
+        if ($task->user_id !== $user->id) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
@@ -98,8 +121,10 @@ class TaskController extends Controller
      */
     public function destroy(Task $task, Request $request): JsonResponse
     {
+        $user = $request->user() ?? $this->getDemoUser();
+        
         // Ensure user can only delete their own tasks
-        if ($task->user_id !== $request->user()->id) {
+        if ($task->user_id !== $user->id) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
@@ -115,8 +140,10 @@ class TaskController extends Controller
      */
     public function toggleStatus(Task $task, Request $request): JsonResponse
     {
+        $user = $request->user() ?? $this->getDemoUser();
+        
         // Ensure user can only toggle their own tasks
-        if ($task->user_id !== $request->user()->id) {
+        if ($task->user_id !== $user->id) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 

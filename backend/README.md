@@ -1,134 +1,216 @@
-# Task Manager API Backend
+# Organizit Task Manager API
 
-A Laravel-based REST API for the Task Manager application with PostgreSQL database and mock payment integration.
+A Laravel-based REST API for managing tasks with Flutterwave payment integration for Pro plan upgrades.
 
-## Features
+## 🚀 Features
 
--   ✅ Task management (CRUD operations)
--   ✅ User plan management (Free/Pro)
--   ✅ Task limits enforcement (5 tasks for free users)
--   ✅ Mock payment system for Pro upgrades
--   ✅ PostgreSQL database
--   ✅ RESTful API endpoints
--   ✅ CORS support for frontend integration
+-   **Task Management**: Create, read, update, delete, and toggle task status
+-   **Plan Management**: Free (5 tasks) vs Pro (unlimited tasks)
+-   **Flutterwave Integration**: Test-mode payment processing for plan upgrades
+-   **Demo Mode**: No authentication required for testing
 
-## Requirements
+## 📋 API Endpoints
 
--   PHP 8.1+
--   Composer
--   PostgreSQL
--   Laravel 12.x
+### Task Management
 
-## Installation
-
-1. **Clone and navigate to the server directory:**
-
-    ```bash
-    cd server
-    ```
-
-2. **Install dependencies:**
-
-    ```bash
-    composer install
-    ```
-
-3. **Set up environment:**
-
-    ```bash
-    cp .env.example .env
-    php artisan key:generate
-    ```
-
-4. **Configure PostgreSQL in `.env`:**
-
-    ```env
-    DB_CONNECTION=pgsql
-    DB_HOST=127.0.0.1
-    DB_PORT=5432
-    DB_DATABASE=task_manager
-    DB_USERNAME=postgres
-    DB_PASSWORD=your_password
-    ```
-
-5. **Create PostgreSQL database:**
-
-    ```sql
-    CREATE DATABASE task_manager;
-    ```
-
-6. **Run migrations:**
-
-    ```bash
-    php artisan migrate
-    ```
-
-7. **Start the server:**
-    ```bash
-    php artisan serve
-    ```
-
-The API will be available at `http://localhost:8000`
-
-## API Endpoints
-
-### Authentication (Optional - Demo Mode)
-
--   `POST /api/demo/setup` - Create demo user
-
-### Tasks
-
--   `GET /api/tasks` - Get all tasks
--   `POST /api/tasks` - Create new task
--   `GET /api/tasks/{id}` - Get specific task
--   `PUT /api/tasks/{id}` - Update task
--   `DELETE /api/tasks/{id}` - Delete task
--   `PATCH /api/tasks/{id}/toggle` - Toggle task status
+-   `GET /api/tasks` - Get all tasks for the current user
+-   `POST /api/tasks` - Create a new task (enforces 5-task limit for free users)
+-   `GET /api/tasks/{id}` - Get a specific task
+-   `PUT /api/tasks/{id}` - Update a task
+-   `DELETE /api/tasks/{id}` - Delete a task
+-   `PATCH /api/tasks/{id}/toggle` - Toggle task status (pending/completed)
 
 ### User Management
 
--   `GET /api/user/plan` - Get user plan info
+-   `GET /api/user/plan` - Get current user plan and limits
 -   `GET /api/user/profile` - Get user profile
 -   `PUT /api/user/profile` - Update user profile
 
-### Payment (Mock)
+### Payment Integration
 
--   `POST /api/payment/initialize` - Initialize payment
--   `GET /api/payment/verify` - Verify payment
--   `POST /api/payment/webhook` - Payment webhook
+-   `POST /api/payment/initialize` - Initialize Flutterwave payment for Pro upgrade
+-   `GET /api/payment/verify` - Verify payment and upgrade user to Pro
+-   `POST /api/payment/webhook` - Flutterwave webhook handler
 
-## API Usage Examples
+### Demo Setup
 
-### Create a Task
+-   `POST /api/demo/setup` - Create demo user for testing
 
-```bash
-curl -X POST http://localhost:8000/api/tasks \
-  -H "Content-Type: application/json" \
-  -d '{
-    "title": "Complete project",
-    "description": "Finish the task manager app"
-  }'
+## 🛠️ Setup Instructions
+
+### 1. Environment Configuration
+
+Create a `.env` file in the backend directory:
+
+```env
+APP_NAME="Organizit Task Manager"
+APP_ENV=local
+APP_KEY=base64:your-app-key-here
+APP_DEBUG=true
+APP_URL=http://localhost:8000
+
+LOG_CHANNEL=stack
+LOG_DEPRECATIONS_CHANNEL=null
+LOG_LEVEL=debug
+
+DB_CONNECTION=pgsql
+DB_HOST=127.0.0.1
+DB_PORT=5432
+DB_DATABASE=organizit
+DB_USERNAME=your_db_user
+DB_PASSWORD=your_db_password
+
+BROADCAST_DRIVER=log
+CACHE_DRIVER=file
+FILESYSTEM_DISK=local
+QUEUE_CONNECTION=sync
+SESSION_DRIVER=file
+SESSION_LIFETIME=120
+
+# Flutterwave Test Keys (Replace with your actual test keys)
+FLW_SECRET_KEY=FLWSECK_TEST-your-secret-key-here
+FLW_PUBLIC_KEY=FLWPUBK_TEST-your-public-key-here
+FLW_SECRET_HASH=your-secret-hash-here
+
+# For testing, you can use these placeholder keys
+# FLW_SECRET_KEY=FLWSECK_TEST-1234567890abcdef1234567890abcdef-X
+# FLW_PUBLIC_KEY=FLWPUBK_TEST-1234567890abcdef1234567890abcdef-X
+# FLW_SECRET_HASH=test_secret_hash
 ```
 
-### Get User Plan
+### 2. Database Setup
 
 ```bash
-curl http://localhost:8000/api/user/plan
+# Install dependencies
+composer install
+
+# Run migrations
+php artisan migrate
+
+# Seed database (optional)
+php artisan db:seed
 ```
 
-### Initialize Payment
+### 3. Flutterwave Test Keys Setup
+
+1. **Get Test Keys**:
+
+    - Sign up at [Flutterwave Dashboard](https://dashboard.flutterwave.com/)
+    - Go to Settings → API Keys
+    - Copy your test secret key and public key
+
+2. **Update Environment**:
+
+    - Replace the placeholder keys in `.env` with your actual test keys
+    - Set `FLW_SECRET_HASH` to a secure random string for webhook verification
+
+3. **Test Mode**:
+    - All payments will be processed in test mode
+    - Use test card numbers from [Flutterwave Test Documentation](https://developer.flutterwave.com/docs/collecting-payments/test-payments)
+
+### 4. Start the Server
 
 ```bash
-curl -X POST http://localhost:8000/api/payment/initialize
+# Start Laravel development server
+php artisan serve
+
+# Or use Laravel Sail (if configured)
+./vendor/bin/sail up
 ```
 
-## Database Schema
+## 🧪 Testing
+
+### Run All Tests
+
+```bash
+php artisan test
+```
+
+### Run Specific Test Suite
+
+```bash
+# Run API tests
+php artisan test --filter=ApiTest
+
+# Run with coverage
+php artisan test --coverage
+```
+
+### Manual Testing with Postman
+
+1. **Setup Demo User**:
+
+    ```
+    POST http://localhost:8000/api/demo/setup
+    ```
+
+2. **Get User Plan**:
+
+    ```
+    GET http://localhost:8000/api/user/plan
+    ```
+
+3. **Create Tasks**:
+
+    ```
+    POST http://localhost:8000/api/tasks
+    Content-Type: application/json
+
+    {
+      "title": "Test Task",
+      "description": "Test Description"
+    }
+    ```
+
+4. **Initialize Payment**:
+
+    ```
+    POST http://localhost:8000/api/payment/initialize
+    ```
+
+5. **Verify Payment** (after completing payment):
+    ```
+    GET http://localhost:8000/api/payment/verify?reference=PAY_XXXXXXXXXX
+    ```
+
+## 💳 Flutterwave Integration Details
+
+### Test Card Numbers
+
+-   **Visa**: 4187427415564246
+-   **Mastercard**: 5438898014560229
+-   **Verve**: 5061460410120223210
+
+### Test Payment Flow
+
+1. Call `/api/payment/initialize` to get payment URL
+2. Redirect user to the payment URL
+3. User completes payment with test card
+4. Flutterwave redirects to your verification URL
+5. Call `/api/payment/verify` to confirm and upgrade user
+
+### Webhook Setup (Optional)
+
+For production, configure webhook URL in Flutterwave dashboard:
+
+```
+https://your-domain.com/api/payment/webhook
+```
+
+## 🔒 Security Notes
+
+-   **Test Mode Only**: This implementation uses Flutterwave test keys
+-   **No Authentication**: Demo mode without user authentication
+-   **Production Ready**: Add proper authentication middleware for production
+-   **Webhook Verification**: Implement proper signature verification for webhooks
+
+## 📊 Database Schema
 
 ### Users Table
 
 -   `id` - Primary key
--   `name` - User name
--   `email` - User email
+-   `name` - User's full name
+-   `email` - User's email address
 -   `password` - Hashed password
 -   `plan` - 'free' or 'pro'
 -   `created_at`, `updated_at` - Timestamps
@@ -142,81 +224,109 @@ curl -X POST http://localhost:8000/api/payment/initialize
 -   `status` - 'pending' or 'completed'
 -   `created_at`, `updated_at` - Timestamps
 
-## Task Limits
+## 🚨 Troubleshooting
 
--   **Free Plan**: Maximum 5 tasks
--   **Pro Plan**: Unlimited tasks
+### Common Issues
 
-## Mock Payment System
+1. **Database Connection Error**:
 
-The payment system is mocked for demonstration:
+    - Check PostgreSQL is running
+    - Verify database credentials in `.env`
+    - Run `php artisan migrate:status`
 
-1. **Initialize Payment**: Creates a mock payment reference
-2. **Verify Payment**: Simulates successful payment and upgrades user to Pro
-3. **Webhook**: Handles payment notifications (mock)
+2. **Flutterwave API Errors**:
 
-### Testing Payment Flow
+    - Verify test keys are correct
+    - Check network connectivity
+    - Review Laravel logs: `storage/logs/laravel.log`
 
-1. Create a user (or use demo setup)
-2. Add 5 tasks (free plan limit)
-3. Try to add a 6th task (should fail)
-4. Initialize payment: `POST /api/payment/initialize`
-5. Verify payment: `GET /api/payment/verify?reference=PAY_XXXXXXXXXX`
-6. User is now Pro and can add unlimited tasks
+3. **Task Limit Not Enforced**:
 
-## CORS Configuration
+    - Ensure user plan is set to 'free'
+    - Check task count in database
+    - Verify User model `getTaskLimit()` method
 
-The API is configured to accept requests from the frontend. Update the CORS configuration in `config/cors.php` if needed.
+4. **Payment Verification Fails**:
+    - Use correct transaction reference
+    - Check Flutterwave dashboard for payment status
+    - Verify webhook configuration
 
-## Development
+### Debug Mode
 
-### Running Tests
+Enable debug mode in `.env`:
 
-```bash
-php artisan test
+```env
+APP_DEBUG=true
+LOG_LEVEL=debug
 ```
 
-### Database Seeding
+## 📝 API Response Examples
 
-```bash
-php artisan db:seed
+### Successful Task Creation
+
+```json
+{
+    "message": "Task created successfully",
+    "task": {
+        "id": 1,
+        "title": "New Task",
+        "description": "Task description",
+        "status": "pending",
+        "user_id": 1,
+        "created_at": "2024-01-01T00:00:00.000000Z",
+        "updated_at": "2024-01-01T00:00:00.000000Z"
+    }
+}
 ```
 
-### Clear Cache
+### Task Limit Reached
 
-```bash
-php artisan cache:clear
-php artisan config:clear
-php artisan route:clear
+```json
+{
+    "message": "You have reached the maximum number of tasks for the free plan. Please upgrade to Pro to add more tasks.",
+    "upgrade_required": true
+}
 ```
 
-## Production Deployment
+### Payment Initialization
 
-1. Set `APP_ENV=production` in `.env`
-2. Set `APP_DEBUG=false` in `.env`
-3. Configure proper database credentials
-4. Set up proper CORS origins
-5. Configure web server (Apache/Nginx)
-6. Set up SSL certificates
+```json
+{
+    "message": "Payment initialized successfully",
+    "payment_reference": "PAY_ABC123DEF",
+    "payment_url": "https://checkout.flutterwave.com/v3/hosted/pay/...",
+    "amount": 999,
+    "currency": "USD",
+    "description": "Upgrade to Pro Plan",
+    "status": "pending"
+}
+```
 
-## Troubleshooting
+### Successful Payment Verification
 
-### Database Connection Issues
+```json
+{
+    "message": "Payment successful! You have been upgraded to Pro.",
+    "plan": "pro",
+    "is_pro": true,
+    "task_limit": 2147483647,
+    "payment_data": {
+        "id": 123456,
+        "tx_ref": "PAY_ABC123DEF",
+        "status": "successful",
+        "amount": 999
+    }
+}
+```
 
--   Ensure PostgreSQL is running
--   Check database credentials in `.env`
--   Verify database exists: `CREATE DATABASE task_manager;`
+## 🤝 Contributing
 
-### Migration Issues
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests for new functionality
+5. Submit a pull request
 
--   Clear cache: `php artisan config:clear`
--   Reset migrations: `php artisan migrate:fresh`
+## 📄 License
 
-### CORS Issues
-
--   Check CORS configuration in `config/cors.php`
--   Ensure frontend URL is in allowed origins
-
-## License
-
-This project is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+This project is licensed under the MIT License.

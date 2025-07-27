@@ -3,17 +3,35 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 
 class UserController extends Controller
 {
     /**
+     * Get or create demo user for testing
+     */
+    private function getDemoUser(): User
+    {
+        // For demo purposes, create or get a demo user
+        return User::firstOrCreate(
+            ['email' => 'demo@example.com'],
+            [
+                'name' => 'Demo User',
+                'email' => 'demo@example.com',
+                'password' => bcrypt('password'),
+                'plan' => 'free'
+            ]
+        );
+    }
+
+    /**
      * Get user plan information
      */
     public function getPlan(Request $request): JsonResponse
     {
-        $user = $request->user();
+        $user = $request->user() ?? $this->getDemoUser();
         
         return response()->json([
             'plan' => $user->plan,
@@ -29,7 +47,7 @@ class UserController extends Controller
      */
     public function profile(Request $request): JsonResponse
     {
-        $user = $request->user();
+        $user = $request->user() ?? $this->getDemoUser();
         
         return response()->json([
             'user' => $user,
@@ -45,16 +63,18 @@ class UserController extends Controller
      */
     public function updateProfile(Request $request): JsonResponse
     {
+        $user = $request->user() ?? $this->getDemoUser();
+        
         $request->validate([
             'name' => 'sometimes|required|string|max:255',
-            'email' => 'sometimes|required|email|unique:users,email,' . $request->user()->id,
+            'email' => 'sometimes|required|email|unique:users,email,' . $user->id,
         ]);
 
-        $request->user()->update($request->only(['name', 'email']));
+        $user->update($request->only(['name', 'email']));
 
         return response()->json([
             'message' => 'Profile updated successfully',
-            'user' => $request->user()->fresh(),
+            'user' => $user->fresh(),
         ]);
     }
 } 

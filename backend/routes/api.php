@@ -54,6 +54,6 @@ Route::post('/demo/setup', function () {
     return response()->json([
         'message' => 'Demo user created',
         'user' => $user,
-        'token' => $user->createToken('demo-token')->plainTextToken
+        'demo_mode' => true
     ]);
 }); 
