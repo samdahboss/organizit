@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState, useEffect } from "react";
 import {
   Plus,
@@ -59,10 +58,11 @@ const TaskManager: React.FC = () => {
       setTasks((prev) => [response.task, ...prev]);
       await loadData(); // Refresh plan data
       setShowAddDialog(false);
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const error = err as { response?: { status: number; data?: { upgrade_required: boolean } } };
       if (
-        err.response?.status === 403 &&
-        err.response?.data?.upgrade_required
+        error.response?.status === 403 &&
+        error.response?.data?.upgrade_required
       ) {
         setShowUpgradeDialog(true);
       } else {
@@ -70,25 +70,25 @@ const TaskManager: React.FC = () => {
       }
     }
   };
-
   const handleDeleteTask = async (id: number) => {
     try {
       await apiService.deleteTask(id);
       setTasks((prev) => prev.filter((task) => task.id !== id));
       await loadData(); // Refresh plan data
-    } catch (err: any) {
+    } catch (err: unknown) {
+      console.log(err)
       console.log(err)
       setError("Failed to delete task");
     }
   };
-
   const handleToggleTask = async (id: number) => {
     try {
       const response = await apiService.toggleTaskStatus(id);
       setTasks((prev) =>
         prev.map((task) => (task.id === id ? response.task : task))
       );
-    } catch (err: any) {
+    } catch (err: unknown) {
+      console.log(err)
       console.log(err)
       setError("Failed to update task");
     }

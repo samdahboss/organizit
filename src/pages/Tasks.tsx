@@ -4,7 +4,6 @@ import {
   Trash2,
   CheckCircle,
   Circle,
-  Crown,
   AlertCircle,
   Calendar,
   Clock,
@@ -143,8 +142,10 @@ const Tasks: React.FC = () => {
     return (
       <div className='flex items-center justify-center min-h-[60vh]'>
         <div className='text-center'>
-          <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto'></div>
-          <p className='mt-4 text-gray-600'>Loading your tasks...</p>
+          <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-gray-800 dark:border-gray-200 mx-auto'></div>
+          <p className='mt-4 text-gray-600 dark:text-gray-400'>
+            Loading your tasks...
+          </p>
         </div>
       </div>
     );
@@ -154,11 +155,11 @@ const Tasks: React.FC = () => {
     return (
       <div className='flex items-center justify-center min-h-[60vh]'>
         <div className='text-center'>
-          <AlertCircle className='h-12 w-12 text-red-500 mx-auto mb-4' />
-          <p className='text-red-600'>{error}</p>
+          <AlertCircle className='h-12 w-12 text-gray-800 dark:text-gray-200 mx-auto mb-4' />
+          <p className='text-gray-800 dark:text-gray-200'>{error}</p>
           <button
             onClick={() => window.location.reload()}
-            className='mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors'
+            className='mt-4 px-4 py-2 bg-gray-800 dark:bg-gray-200 text-white dark:text-gray-800 rounded-lg hover:bg-gray-900 dark:hover:bg-gray-100 transition-colors'
           >
             Retry
           </button>
@@ -172,24 +173,26 @@ const Tasks: React.FC = () => {
       {/* Header */}
       <div className='flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0'>
         <div>
-          <h1 className='text-3xl font-bold text-gray-900'>Tasks</h1>
-          <p className='text-gray-600 mt-1'>
+          <h1 className='text-3xl font-bold text-gray-900 dark:text-gray-100'>
+            Tasks
+          </h1>
+          <p className='text-gray-600 dark:text-gray-400 mt-1'>
             Manage and organize your tasks efficiently
           </p>
         </div>
         <div className='flex items-center space-x-3'>
           {userPlan && (
-            <div className='hidden sm:flex items-center space-x-2 px-3 py-2 bg-white rounded-lg shadow-sm border border-gray-200'>
+            <div className='hidden sm:flex items-center space-x-2 px-3 py-2 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700'>
               {userPlan.is_pro ? (
-                <Crown className='h-4 w-4 text-yellow-500' />
+                <div className='h-4 w-4 rounded-full bg-gray-800 dark:bg-gray-200'></div>
               ) : (
-                <div className='h-4 w-4 rounded-full bg-gray-300'></div>
+                <div className='h-4 w-4 rounded-full bg-gray-300 dark:bg-gray-600'></div>
               )}
-              <span className='text-sm font-medium text-gray-700'>
+              <span className='text-sm font-medium text-gray-700 dark:text-gray-300'>
                 {userPlan.is_pro ? "Pro" : "Free"}
               </span>
               {!userPlan.is_pro && (
-                <span className='text-xs text-gray-500'>
+                <span className='text-xs text-gray-500 dark:text-gray-400'>
                   ({userPlan.remaining_tasks} left)
                 </span>
               )}
@@ -197,7 +200,7 @@ const Tasks: React.FC = () => {
           )}
           <button
             onClick={() => setShowAddDialog(true)}
-            className='flex items-center space-x-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white px-4 py-2 rounded-lg hover:from-blue-600 hover:to-purple-700 transition-all duration-200 shadow-lg'
+            className='flex items-center space-x-2 bg-gray-800 dark:bg-gray-200 text-white dark:text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-900 dark:hover:bg-gray-100 transition-all duration-200 shadow-lg'
           >
             <Plus className='h-4 w-4' />
             <span>Add Task</span>
@@ -207,43 +210,51 @@ const Tasks: React.FC = () => {
 
       {/* Stats */}
       <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
-        <div className='bg-white rounded-xl p-6 shadow-sm border border-gray-100'>
+        <div className='bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700'>
           <div className='flex items-center justify-between'>
             <div>
-              <p className='text-sm font-medium text-gray-600'>Total Tasks</p>
-              <p className='text-2xl font-bold text-gray-900'>{totalTasks}</p>
+              <p className='text-sm font-medium text-gray-600 dark:text-gray-400'>
+                Total Tasks
+              </p>
+              <p className='text-2xl font-bold text-gray-900 dark:text-gray-100'>
+                {totalTasks}
+              </p>
             </div>
-            <div className='p-3 bg-blue-100 rounded-lg'>
-              <Circle className='h-6 w-6 text-blue-600' />
+            <div className='p-3 bg-gray-100 dark:bg-gray-700 rounded-lg'>
+              <Circle className='h-6 w-6 text-gray-600 dark:text-gray-400' />
             </div>
           </div>
         </div>
-        <div className='bg-white rounded-xl p-6 shadow-sm border border-gray-100'>
+        <div className='bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700'>
           <div className='flex items-center justify-between'>
             <div>
-              <p className='text-sm font-medium text-gray-600'>Completed</p>
-              <p className='text-2xl font-bold text-green-600'>
+              <p className='text-sm font-medium text-gray-600 dark:text-gray-400'>
+                Completed
+              </p>
+              <p className='text-2xl font-bold text-gray-900 dark:text-gray-100'>
                 {completedTasks}
               </p>
             </div>
-            <div className='p-3 bg-green-100 rounded-lg'>
-              <CheckCircle className='h-6 w-6 text-green-600' />
+            <div className='p-3 bg-gray-100 dark:bg-gray-700 rounded-lg'>
+              <CheckCircle className='h-6 w-6 text-gray-600 dark:text-gray-400' />
             </div>
           </div>
         </div>
-        <div className='bg-white rounded-xl p-6 shadow-sm border border-gray-100'>
+        <div className='bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700'>
           <div className='flex items-center justify-between'>
             <div>
-              <p className='text-sm font-medium text-gray-600'>Progress</p>
-              <p className='text-2xl font-bold text-purple-600'>
+              <p className='text-sm font-medium text-gray-600 dark:text-gray-400'>
+                Progress
+              </p>
+              <p className='text-2xl font-bold text-gray-900 dark:text-gray-100'>
                 {totalTasks > 0
                   ? Math.round((completedTasks / totalTasks) * 100)
                   : 0}
                 %
               </p>
             </div>
-            <div className='p-3 bg-purple-100 rounded-lg'>
-              <div className='w-6 h-6 border-2 border-purple-600 border-t-transparent rounded-full animate-spin'></div>
+            <div className='p-3 bg-gray-100 dark:bg-gray-700 rounded-lg'>
+              <div className='w-6 h-6 border-2 border-gray-600 dark:border-gray-400 border-t-transparent rounded-full animate-spin'></div>
             </div>
           </div>
         </div>
@@ -251,17 +262,17 @@ const Tasks: React.FC = () => {
 
       {/* Upgrade Banner for Free Users */}
       {userPlan && !userPlan.is_pro && userPlan.remaining_tasks <= 2 && (
-        <div className='bg-gradient-to-r from-yellow-50 to-orange-50 border border-yellow-200 rounded-xl p-6'>
+        <div className='bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-6'>
           <div className='flex items-center justify-between'>
             <div className='flex items-center space-x-3'>
-              <div className='p-2 bg-yellow-100 rounded-lg'>
-                <Crown className='h-5 w-5 text-yellow-600' />
+              <div className='p-2 bg-gray-100 dark:bg-gray-700 rounded-lg'>
+                <div className='h-5 w-5 rounded-full bg-gray-800 dark:bg-gray-200'></div>
               </div>
               <div>
-                <h3 className='text-lg font-semibold text-yellow-800'>
+                <h3 className='text-lg font-semibold text-gray-800 dark:text-gray-200'>
                   Upgrade to Pro
                 </h3>
-                <p className='text-yellow-700 mt-1'>
+                <p className='text-gray-700 dark:text-gray-300 mt-1'>
                   You have {userPlan.remaining_tasks} tasks remaining. Upgrade
                   to Pro for unlimited tasks!
                 </p>
@@ -269,35 +280,35 @@ const Tasks: React.FC = () => {
             </div>
             <button
               onClick={() => setShowUpgradeDialog(true)}
-              className='bg-gradient-to-r from-yellow-500 to-orange-500 text-white px-6 py-2 rounded-lg hover:from-yellow-600 hover:to-orange-600 transition-all duration-200 shadow-lg'
+              className='bg-gray-800 dark:bg-gray-200 text-white dark:text-gray-800 px-6 py-2 rounded-lg hover:bg-gray-900 dark:hover:bg-gray-100 transition-all duration-200 shadow-lg'
             >
               Upgrade Now
             </button>
           </div>
         </div>
       )}
-      
+
       {/* Search and Filter */}
-      <div className='bg-white rounded-xl p-6 shadow-sm border border-gray-100'>
+      <div className='bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700'>
         <div className='flex flex-col sm:flex-row gap-4'>
           <div className='flex-1 relative'>
-            <Search className='absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400' />
+            <Search className='absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-gray-500' />
             <input
               type='text'
               placeholder='Search tasks...'
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className='w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+              className='w-full pl-10 pr-4 py-2 border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-gray-500 dark:focus:ring-gray-400 focus:border-transparent'
             />
           </div>
           <div className='flex items-center space-x-2'>
-            <Filter className='h-4 w-4 text-gray-400' />
+            <Filter className='h-4 w-4 text-gray-400 dark:text-gray-500' />
             <select
               value={filter}
               onChange={(e) =>
                 setFilter(e.target.value as "all" | "completed" | "pending")
               }
-              className='px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+              className='px-3 py-2 border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-gray-500 dark:focus:ring-gray-400 focus:border-transparent'
             >
               <option value='all'>All Tasks</option>
               <option value='pending'>Pending</option>
@@ -308,16 +319,16 @@ const Tasks: React.FC = () => {
       </div>
 
       {/* Task List */}
-      <div className='bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden'>
+      <div className='bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden'>
         {filteredTasks.length === 0 ? (
           <div className='p-12 text-center'>
-            <div className='h-20 w-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6'>
-              <CheckCircle className='h-10 w-10 text-gray-400' />
+            <div className='h-20 w-20 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-6'>
+              <CheckCircle className='h-10 w-10 text-gray-400 dark:text-gray-500' />
             </div>
-            <h3 className='text-xl font-semibold text-gray-900 mb-2'>
+            <h3 className='text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2'>
               {searchTerm ? "No tasks found" : "No tasks yet"}
             </h3>
-            <p className='text-gray-600 mb-6 max-w-md mx-auto'>
+            <p className='text-gray-600 dark:text-gray-400 mb-6 max-w-md mx-auto'>
               {searchTerm
                 ? "Try adjusting your search terms"
                 : "Get started by adding your first task to organize your work"}
@@ -325,18 +336,18 @@ const Tasks: React.FC = () => {
             {!searchTerm && (
               <button
                 onClick={() => setShowAddDialog(true)}
-                className='bg-gradient-to-r from-blue-500 to-purple-600 text-white px-6 py-3 rounded-lg hover:from-blue-600 hover:to-purple-700 transition-all duration-200 shadow-lg'
+                className='bg-gray-800 dark:bg-gray-200 text-white dark:text-gray-800 px-6 py-3 rounded-lg hover:bg-gray-900 dark:hover:bg-gray-100 transition-all duration-200 shadow-lg'
               >
                 Add Your First Task
               </button>
             )}
           </div>
         ) : (
-          <div className='divide-y divide-gray-100'>
+          <div className='divide-y divide-gray-100 dark:divide-gray-700'>
             {filteredTasks.map((task) => (
               <div
                 key={task.id}
-                className='p-6 hover:bg-gray-50 transition-all duration-200'
+                className='p-6 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200'
               >
                 <div className='flex items-start space-x-4'>
                   <button
@@ -344,17 +355,17 @@ const Tasks: React.FC = () => {
                     className='mt-1 flex-shrink-0 transition-all duration-200 hover:scale-110'
                   >
                     {task.status === "completed" ? (
-                      <CheckCircle className='h-6 w-6 text-green-500' />
+                      <CheckCircle className='h-6 w-6 text-gray-800 dark:text-gray-200' />
                     ) : (
-                      <Circle className='h-6 w-6 text-gray-400 hover:text-blue-500' />
+                      <Circle className='h-6 w-6 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300' />
                     )}
                   </button>
                   <div className='flex-1 min-w-0'>
                     <h3
                       className={`text-lg font-semibold ${
                         task.status === "completed"
-                          ? "text-gray-500 line-through"
-                          : "text-gray-900"
+                          ? "text-gray-500 dark:text-gray-400 line-through"
+                          : "text-gray-900 dark:text-gray-100"
                       }`}
                     >
                       {task.title}
@@ -363,21 +374,21 @@ const Tasks: React.FC = () => {
                       <p
                         className={`mt-2 text-sm ${
                           task.status === "completed"
-                            ? "text-gray-400"
-                            : "text-gray-600"
+                            ? "text-gray-400 dark:text-gray-500"
+                            : "text-gray-600 dark:text-gray-400"
                         }`}
                       >
                         {task.description}
                       </p>
                     )}
                     <div className='flex items-center space-x-4 mt-3'>
-                      <div className='flex items-center space-x-1 text-xs text-gray-500'>
+                      <div className='flex items-center space-x-1 text-xs text-gray-500 dark:text-gray-400'>
                         <Calendar className='h-3 w-3' />
                         <span>
                           {new Date(task.created_at).toLocaleDateString()}
                         </span>
                       </div>
-                      <div className='flex items-center space-x-1 text-xs text-gray-500'>
+                      <div className='flex items-center space-x-1 text-xs text-gray-500 dark:text-gray-400'>
                         <Clock className='h-3 w-3' />
                         <span>
                           {new Date(task.created_at).toLocaleTimeString()}
@@ -387,7 +398,7 @@ const Tasks: React.FC = () => {
                   </div>
                   <button
                     onClick={() => handleDeleteTask(task.id)}
-                    className='flex-shrink-0 p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all duration-200'
+                    className='flex-shrink-0 p-2 text-gray-400 dark:text-gray-500 hover:text-gray-800 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-lg transition-all duration-200'
                   >
                     <Trash2 className='h-4 w-4' />
                   </button>
@@ -397,8 +408,6 @@ const Tasks: React.FC = () => {
           </div>
         )}
       </div>
-
-      
 
       {/* Dialogs */}
       <AddTaskDialog
