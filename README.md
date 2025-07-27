@@ -1,271 +1,164 @@
-# Task Manager App
+# Task Manager with Mocked Payment Upgrade
 
-A full-stack Task Manager application with a mocked payment upgrade system. Built with Laravel (backend) and React + TypeScript (frontend).
+> **Take-Home Assignment Implementation** - A full-stack task manager with 5-task limit for free users and Flutterwave payment integration for Pro upgrades.
 
-## 🚀 Features
+## ✅ Assignment Requirements Met
 
-- **Task Management**: Create, view, and delete tasks
-- **Free Plan Limit**: Free users are limited to 5 tasks
-- **Pro Upgrade**: Mock payment system to upgrade to unlimited tasks
-- **Modern UI**: Clean interface built with Tailwind CSS and Radix UI
-- **Real-time Updates**: Task status updates and plan changes
-- **Responsive Design**: Works on desktop and mobile devices
+- ✅ **Task Management**: View, add, delete tasks with proper API endpoints
+- ✅ **5-Task Limit**: Strictly enforced for free users
+- ✅ **Payment Integration**: Flutterwave test-mode payment gateway
+- ✅ **UI Features**: Task counter, upgrade prompts, clean interface
+- ✅ **Bonus**: Loading states, error handling, animations
 
-## 🛠️ Tech Stack
+## 🚀 Quick Setup (2 minutes)
 
-### Backend
-
-- **Laravel 12** - PHP framework
-- **PostgreSQL** - Database
-- **Laravel Sanctum** - API authentication
-- **CORS** - Cross-origin resource sharing
-
-### Frontend
-
-- **React 19** - UI library
-- **TypeScript** - Type safety
-- **Tailwind CSS** - Styling
-- **Radix UI** - Accessible components
-- **Lucide React** - Icons
-- **Axios** - HTTP client
-- **Vite** - Build tool
-
-## 📋 Prerequisites
-
-- PHP 8.2+
-- Node.js 18+
-- PostgreSQL
-- Composer
-- npm
-
-## 🚀 Quick Start
-
-### 1. Clone the Repository
+### Prerequisites
 
 ```bash
-git clone <repository-url>
-cd organizit
+# Required software
+PHP 8.2+, Node.js 18+, Composer, npm
+# Database: PostgreSQL (or SQLite for quick testing)
 ```
 
-### 2. Backend Setup (Laravel)
+### 1. Backend Setup
 
 ```bash
 cd backend
-
-# Install PHP dependencies
 composer install
-
-# Copy environment file
 cp .env.example .env
-
-# Generate application key
 php artisan key:generate
 
-# Configure database in .env file
-# Update DB_CONNECTION, DB_HOST, DB_PORT, DB_DATABASE, DB_USERNAME, DB_PASSWORD
-
-# Run migrations
+# Quick SQLite setup (or configure PostgreSQL in .env)
+touch database/database.sqlite
 php artisan migrate
-
-# Start the development server
-php artisan serve
+php artisan serve  # Runs on http://localhost:8000
 ```
 
-The Laravel backend will be running at `http://localhost:8000`
-
-### 3. Frontend Setup (React)
+### 2. Frontend Setup
 
 ```bash
-# From the project root
+# From project root
 npm install
-
-# Start the development server
-npm run dev
+npm run dev  # Runs on http://localhost:5173
 ```
 
-The React frontend will be running at `http://localhost:5173`
+### 3. Test the Application
 
-## 🎯 How to Test
+1. Open http://localhost:5173
+2. Add 5 tasks (free limit)
+3. Try adding a 6th task → upgrade prompt appears
+4. Click "Upgrade to Pro" → payment simulation
+5. After payment → unlimited tasks enabled
 
-### 1. Basic Task Management
+## 🧪 Testing Payment Flow
 
-1. Open the app in your browser
-2. Add a few tasks using the "Add Task" button
-3. Toggle task completion by clicking the circle icon
-4. Delete tasks using the trash icon
+### Mock Payment Process
 
-### 2. Free Plan Limit Testing
+1. **Reach 5-task limit** → "Upgrade to Pro" button appears
+2. **Click upgrade** → Flutterwave payment modal opens
+3. **Use test card**: 4187427415564246 (Visa)
+4. **Payment simulates for 3 seconds** → Auto-upgrade to Pro
+5. **Result**: Unlimited task creation + Pro indicator
 
-1. Add exactly 5 tasks
-2. Try to add a 6th task
-3. You should see an upgrade prompt
+### API Testing (Optional)
 
-### 3. Mock Payment Flow
+```bash
+# Test API endpoints directly
+curl http://localhost:8000/api/user/plan
+curl -X POST http://localhost:8000/api/tasks -H "Content-Type: application/json" -d '{"title":"Test Task"}'
+```
 
-1. When you reach the 5-task limit, click "Upgrade Now"
-2. The app will simulate a payment process
-3. After 3 seconds, the payment will be "verified"
-4. Your account will be upgraded to Pro
-5. You can now add unlimited tasks
+## 🛠️ Tech Stack
 
-### 4. Pro Plan Features
+**Backend**: Laravel 12, PostgreSQL/SQLite, Flutterwave API
+**Frontend**: React 19 + TypeScript, Vite, Tailwind CSS, Radix UI
 
-- Unlimited task creation
-- Crown icon in the header
-- No more upgrade prompts
+## 📋 Core API Endpoints (Assignment Requirements)
 
-## 🔧 API Endpoints
+```bash
+# Task Management
+GET    /api/tasks              # Get all tasks
+POST   /api/tasks              # Create task (enforces 5-task limit)
+DELETE /api/tasks/:id          # Delete task
 
-### Authentication
+# User Plan
+GET    /api/user/plan          # Returns "free" or "pro"
 
-- `POST /api/demo/setup` - Create demo user and get token
+# Payment
+POST   /api/payment/initialize # Returns mock payment URL
+GET    /api/payment/verify     # Simulates payment success
+```
 
-### Tasks
+## 🎯 Assignment Assumptions
 
-- `GET /api/tasks` - Get all tasks
-- `POST /api/tasks` - Create a new task
-- `PUT /api/tasks/{id}` - Update a task
-- `DELETE /api/tasks/{id}` - Delete a task
-- `PATCH /api/tasks/{id}/toggle` - Toggle task status
+1. **No Authentication Required**: Uses demo user for quick testing
+2. **Flutterwave Test Mode**: Safe payment simulation with test cards
+3. **Database Flexibility**: SQLite for quick setup, PostgreSQL for production
+4. **Task Limit Enforcement**: Server-side validation prevents 6+ tasks for free users
+5. **Payment Simulation**: 3-second mock payment for demo purposes
 
-### User Plan
+## 🔧 Production Configuration
 
-- `GET /api/user/plan` - Get user plan information
+### For PostgreSQL (Recommended)
 
-### Payment
+```bash
+# Update backend/.env
+DB_CONNECTION=pgsql
+DB_HOST=127.0.0.1
+DB_PORT=5432
+DB_DATABASE=organizit
+DB_USERNAME=your_username
+DB_PASSWORD=your_password
+```
 
-- `POST /api/payment/initialize` - Initialize mock payment
-- `GET /api/payment/verify` - Verify payment (mock)
+### For Flutterwave Live Mode
 
-## 🎨 UI Components
+```bash
+# Update backend/.env
+FLW_PUBLIC_KEY=your_live_public_key
+FLW_SECRET_KEY=your_live_secret_key
+FLW_SECRET_HASH=your_webhook_secret_hash
+```
 
-### TaskManager
-
-Main component that handles:
-
-- Task list display
-- Add/delete task functionality
-- Plan status display
-- Upgrade prompts
-
-### AddTaskDialog
-
-Modal dialog for creating new tasks with:
-
-- Form validation
-- Loading states
-- Error handling
-
-### UpgradeDialog
-
-Payment flow dialog with:
-
-- Plan benefits display
-- Mock payment simulation
-- Success/error states
-- Animated transitions
-
-## 🔒 Security Features
-
-- **CORS Configuration**: Properly configured for cross-origin requests
-- **Input Validation**: Server-side validation for all inputs
-- **Error Handling**: Comprehensive error handling and user feedback
-- **Mock Authentication**: Demo user setup for testing
-
-## 🧪 Testing the Payment System
-
-The payment system is completely mocked for demonstration purposes:
-
-1. **Payment Initialization**: Creates a mock payment reference
-2. **Payment Simulation**: 3-second delay to simulate processing
-3. **Payment Verification**: Automatically "verifies" the payment
-4. **Plan Upgrade**: User is upgraded to Pro plan
-
-In a real implementation, you would:
-
-- Integrate with actual payment gateways (Stripe, Paystack, etc.)
-- Implement proper webhook handling
-- Add payment verification logic
-- Handle failed payments
-
-## 📱 Responsive Design
-
-The app is fully responsive and works on:
-
-- Desktop browsers
-- Tablets
-- Mobile devices
-
-## 🎨 Design Features
-
-- **Modern UI**: Clean, minimalist design
-- **Smooth Animations**: Loading states and transitions
-- **Accessibility**: Built with Radix UI for accessibility
-- **Color Coding**: Visual indicators for task status and plan type
-- **Gradient Elements**: Beautiful gradients for premium features
-
-## 🚀 Deployment
-
-### Backend (Laravel)
-
-1. Set up a web server (Apache/Nginx)
-2. Configure environment variables
-3. Run `php artisan migrate --force`
-4. Set up SSL certificate
-
-### Frontend (React)
-
-1. Build the project: `npm run build`
-2. Deploy the `dist` folder to a web server
-3. Configure API base URL for production
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests if applicable
-5. Submit a pull request
-
-## 📄 License
-
-This project is open source and available under the [MIT License](LICENSE).
-
-## 🆘 Support
-
-If you encounter any issues:
-
-1. Check the browser console for errors
-2. Verify the Laravel server is running
-3. Ensure database migrations are complete
-4. Check CORS configuration
-
-## 🎯 Project Structure
+## 📁 Project Structure
 
 ```
 organizit/
-├── backend/                 # Laravel backend
-│   ├── app/
-│   │   ├── Http/Controllers/Api/
-│   │   │   ├── TaskController.php
-│   │   │   ├── UserController.php
-│   │   │   └── PaymentController.php
-│   │   └── Models/
-│   │       ├── Task.php
-│   │       └── User.php
-│   ├── database/migrations/
-│   └── routes/api.php
-├── src/                     # React frontend
+├── backend/                    # Laravel API
+│   ├── app/Http/Controllers/Api/
+│   │   ├── TaskController.php     # Task CRUD + limit enforcement
+│   │   ├── UserController.php     # Plan management
+│   │   └── PaymentController.php  # Flutterwave integration
+│   ├── app/Models/
+│   │   ├── Task.php              # Task model
+│   │   └── User.php              # User model with plan logic
+│   └── routes/api.php            # API routes
+├── src/                        # React Frontend
 │   ├── components/
-│   │   ├── TaskManager.tsx
-│   │   ├── AddTaskDialog.tsx
-│   │   └── UpgradeDialog.tsx
-│   ├── services/
-│   │   └── api.ts
-│   └── App.tsx
-└── README.md
+│   │   ├── TaskManager.tsx       # Main task interface
+│   │   ├── AddTaskDialog.tsx     # Task creation modal
+│   │   └── UpgradeDialog.tsx     # Payment flow modal
+│   └── services/api.ts           # API client
+└── README.md                   # This file
+```
+
+## � Troubleshooting
+
+### Common Issues
+
+1. **Port conflicts**: Backend (8000), Frontend (5173)
+2. **Database errors**: Check `.env` configuration
+3. **CORS issues**: Verify API_URL in frontend
+4. **Payment test**: Use test card `4187427415564246`
+
+### Quick Reset
+
+```bash
+# Reset database
+cd backend && php artisan migrate:fresh
+# Clear browser storage for clean state
 ```
 
 ---
 
-**Note**: This is a demonstration project. The payment system is mocked and no real payments are processed.
+**Note**: This is a demonstration project with mocked payments. No real transactions are processed.
