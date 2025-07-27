@@ -9,11 +9,7 @@ interface UpgradeDialogProps {
   onSuccess: () => void;
 }
 
-const UpgradeDialog: React.FC<UpgradeDialogProps> = ({
-  open,
-  onClose,
-  onSuccess,
-}) => {
+const UpgradeDialog: React.FC<UpgradeDialogProps> = ({ open, onClose }) => {
   const [step, setStep] = useState<
     "initial" | "processing" | "success" | "error"
   >("initial");
@@ -24,39 +20,9 @@ const UpgradeDialog: React.FC<UpgradeDialogProps> = ({
       setStep("processing");
       const response = await apiService.initializePayment();
 
-      // Redirect to Flutterwave payment page
-      window.open(response.payment_url, "_blank");
-
-      // Start polling for payment verification
-      const pollInterval = setInterval(async () => {
-        try {
-          const verificationResponse = await apiService.verifyPayment(
-            response.payment_reference
-          );
-          if (verificationResponse.is_pro) {
-            clearInterval(pollInterval);
-            setStep("success");
-            setTimeout(() => {
-              onSuccess();
-              handleClose();
-            }, 2000);
-          }
-        } catch (verificationError) {
-          // Payment not yet completed, continue polling
-          console.log("Payment still pending...", verificationError);
-        }
-      }, 3000);
-
-      // Stop polling after 5 minutes
-      setTimeout(() => {
-        clearInterval(pollInterval);
-        if (step === "processing") {
-          setStep("error");
-          setError(
-            "Payment verification timeout. Please try again or contact support."
-          );
-        }
-      }, 300000);
+      // Redirect to Flutterwave payment page in the same window
+      // This will redirect to our payment success page after completion
+      window.location.href = response.payment_url;
     } catch (err) {
       setStep("error");
       setError("Failed to initialize payment. Please try again.");
@@ -80,16 +46,15 @@ const UpgradeDialog: React.FC<UpgradeDialogProps> = ({
           <div className='text-center py-8'>
             <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-gray-800 dark:border-gray-200 mx-auto mb-4'></div>
             <h3 className='text-lg font-medium text-gray-900 dark:text-gray-100 mb-2'>
-              Processing Payment
+              Redirecting to Payment
             </h3>
             <p className='text-gray-600 dark:text-gray-400'>
-              Complete your payment in the Flutterwave window to upgrade...
+              Please wait while we redirect you to complete your payment...
             </p>
             <div className='mt-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg'>
               <p className='text-sm text-gray-700 dark:text-gray-300'>
-                You have been redirected to Flutterwave to complete your
-                payment. This window will update automatically once payment is
-                confirmed.
+                You will be redirected to Flutterwave to complete your payment
+                securely.
               </p>
             </div>
           </div>

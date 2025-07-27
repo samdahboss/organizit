@@ -68,7 +68,7 @@ class PaymentController extends Controller
                 'tx_ref' => $txRef,
                 'amount' => 2000, // N2000
                 'currency' => 'NGN',
-                'redirect_url' => env('APP_URL') . '/api/payment/verify?reference=' . $txRef,
+                'redirect_url' => env('FRONTEND_URL', 'http://localhost:5173') . '/payment/success?reference=' . $txRef,
                 'customer' => [
                     'email' => $user->email,
                     'name' => $user->name,
