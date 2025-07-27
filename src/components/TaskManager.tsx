@@ -53,13 +53,22 @@ const TaskManager: React.FC = () => {
   };
 
   const handleAddTask = async (title: string, description?: string) => {
+    // Check if user has remaining tasks before attempting to create
+    if (userPlan && userPlan.plan === "free" && userPlan.remaining_tasks <= 0) {
+      setShowUpgradeDialog(true);
+      setShowAddDialog(false);
+      return;
+    }
+
     try {
       const response = await apiService.createTask({ title, description });
       setTasks((prev) => [response.task, ...prev]);
       await loadData(); // Refresh plan data
       setShowAddDialog(false);
     } catch (err: unknown) {
-      const error = err as { response?: { status: number; data?: { upgrade_required: boolean } } };
+      const error = err as {
+        response?: { status: number; data?: { upgrade_required: boolean } };
+      };
       if (
         error.response?.status === 403 &&
         error.response?.data?.upgrade_required
@@ -76,8 +85,8 @@ const TaskManager: React.FC = () => {
       setTasks((prev) => prev.filter((task) => task.id !== id));
       await loadData(); // Refresh plan data
     } catch (err: unknown) {
-      console.log(err)
-      console.log(err)
+      console.log(err);
+      console.log(err);
       setError("Failed to delete task");
     }
   };
@@ -88,10 +97,20 @@ const TaskManager: React.FC = () => {
         prev.map((task) => (task.id === id ? response.task : task))
       );
     } catch (err: unknown) {
-      console.log(err)
-      console.log(err)
+      console.log(err);
+      console.log(err);
       setError("Failed to update task");
     }
+  };
+
+  const handleAddTaskClick = () => {
+    console.log(userPlan)
+    // Check if user has remaining tasks before opening add dialog
+    // if (userPlan && userPlan.plan === "free" && userPlan.remaining_tasks <= 0) {
+    //   setShowUpgradeDialog(true);
+    //   return;
+    // }
+    // setShowAddDialog(true);
   };
 
   const handleUpgradeSuccess = async () => {
@@ -143,13 +162,13 @@ const TaskManager: React.FC = () => {
               {userPlan && (
                 <div className='text-right'>
                   <div className='flex items-center space-x-2'>
-                    {userPlan.is_pro ? (
+                    {userPlan.plan === "pro" ? (
                       <Crown className='h-5 w-5 text-yellow-500' />
                     ) : (
                       <div className='h-5 w-5 rounded-full bg-gray-300'></div>
                     )}
                     <span className='text-sm font-medium'>
-                      {userPlan.is_pro ? "Pro Plan" : "Free Plan"}
+                      {userPlan.plan === "pro" ? "Pro Plan" : "Free Plan"}
                     </span>
                   </div>
                   <p className='text-xs text-gray-500'>
@@ -158,7 +177,7 @@ const TaskManager: React.FC = () => {
                 </div>
               )}
               <button
-                onClick={() => setShowAddDialog(true)}
+                onClick={handleAddTaskClick}
                 className='flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors'
               >
                 <Plus className='h-4 w-4' />
@@ -182,7 +201,7 @@ const TaskManager: React.FC = () => {
                 Get started by adding your first task
               </p>
               <button
-                onClick={() => setShowAddDialog(true)}
+                onClick={handleAddTaskClick}
                 className='bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors'
               >
                 Add Your First Task
@@ -245,27 +264,29 @@ const TaskManager: React.FC = () => {
         </div>
 
         {/* Upgrade Banner for Free Users */}
-        {userPlan && !userPlan.is_pro && userPlan.remaining_tasks <= 2 && (
-          <div className='mt-6 bg-gradient-to-r from-yellow-50 to-orange-50 border border-yellow-200 rounded-lg p-4'>
-            <div className='flex items-center justify-between'>
-              <div>
-                <h3 className='text-lg font-medium text-yellow-800'>
-                  Upgrade to Pro
-                </h3>
-                <p className='text-yellow-700 mt-1'>
-                  You have {userPlan.remaining_tasks} tasks remaining. Upgrade
-                  to Pro for unlimited tasks!
-                </p>
+        {userPlan &&
+          userPlan.plan === "free" &&
+          userPlan.remaining_tasks <= 2 && (
+            <div className='mt-6 bg-gradient-to-r from-yellow-50 to-orange-50 border border-yellow-200 rounded-lg p-4'>
+              <div className='flex items-center justify-between'>
+                <div>
+                  <h3 className='text-lg font-medium text-yellow-800'>
+                    Upgrade to Pro
+                  </h3>
+                  <p className='text-yellow-700 mt-1'>
+                    You have {userPlan.remaining_tasks} tasks remaining. Upgrade
+                    to Pro for unlimited tasks!
+                  </p>
+                </div>
+                <button
+                  onClick={() => setShowUpgradeDialog(true)}
+                  className='bg-yellow-600 text-white px-4 py-2 rounded-lg hover:bg-yellow-700 transition-colors'
+                >
+                  Upgrade Now
+                </button>
               </div>
-              <button
-                onClick={() => setShowUpgradeDialog(true)}
-                className='bg-yellow-600 text-white px-4 py-2 rounded-lg hover:bg-yellow-700 transition-colors'
-              >
-                Upgrade Now
-              </button>
             </div>
-          </div>
-        )}
+          )}
       </div>
 
       {/* Dialogs */}

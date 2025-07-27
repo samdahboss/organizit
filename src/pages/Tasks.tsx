@@ -67,6 +67,13 @@ const Tasks: React.FC = () => {
   };
 
   const handleAddTask = async (title: string, description?: string) => {
+    // Check if user has remaining tasks before attempting to create
+    if (userPlan && userPlan.plan === "free" && userPlan.remaining_tasks <= 0) {
+      setShowUpgradeDialog(true);
+      setShowAddDialog(false);
+      return;
+    }
+
     try {
       const response = await apiService.createTask({ title, description });
       setTasks((prev) => [response.task, ...prev]);
@@ -82,6 +89,15 @@ const Tasks: React.FC = () => {
         setError("Failed to create task");
       }
     }
+  };
+
+  const handleAddTaskClick = () => {
+    // Check if user has remaining tasks before opening add dialog
+    if (userPlan && userPlan.plan === "free" && userPlan.remaining_tasks <= 0) {
+      setShowUpgradeDialog(true);
+      return;
+    }
+    setShowAddDialog(true);
   };
 
   const handleDeleteTask = async (id: number) => {
@@ -183,15 +199,15 @@ const Tasks: React.FC = () => {
         <div className='flex items-center space-x-3'>
           {userPlan && (
             <div className='hidden sm:flex items-center space-x-2 px-3 py-2 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700'>
-              {userPlan.is_pro ? (
+              {userPlan.plan === "pro" ? (
                 <div className='h-4 w-4 rounded-full bg-gray-800 dark:bg-gray-200'></div>
               ) : (
                 <div className='h-4 w-4 rounded-full bg-gray-300 dark:bg-gray-600'></div>
               )}
               <span className='text-sm font-medium text-gray-700 dark:text-gray-300'>
-                {userPlan.is_pro ? "Pro" : "Free"}
+                {userPlan.plan === "pro" ? "Pro" : "Free"}
               </span>
-              {!userPlan.is_pro && (
+              {userPlan.plan !== "pro" && (
                 <span className='text-xs text-gray-500 dark:text-gray-400'>
                   ({userPlan.remaining_tasks} left)
                 </span>
@@ -199,7 +215,7 @@ const Tasks: React.FC = () => {
             </div>
           )}
           <button
-            onClick={() => setShowAddDialog(true)}
+            onClick={handleAddTaskClick}
             className='flex items-center space-x-2 bg-gray-800 dark:bg-gray-200 text-white dark:text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-900 dark:hover:bg-gray-100 transition-all duration-200 shadow-lg'
           >
             <Plus className='h-4 w-4' />
@@ -261,32 +277,34 @@ const Tasks: React.FC = () => {
       </div>
 
       {/* Upgrade Banner for Free Users */}
-      {userPlan && !userPlan.is_pro && userPlan.remaining_tasks <= 2 && (
-        <div className='bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-6'>
-          <div className='flex items-center justify-between'>
-            <div className='flex items-center space-x-3'>
-              <div className='p-2 bg-gray-100 dark:bg-gray-700 rounded-lg'>
-                <div className='h-5 w-5 rounded-full bg-gray-800 dark:bg-gray-200'></div>
+      {userPlan &&
+        userPlan.plan === "free" &&
+        userPlan.remaining_tasks <= 2 && (
+          <div className='bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-6'>
+            <div className='flex items-center justify-between'>
+              <div className='flex items-center space-x-3'>
+                <div className='p-2 bg-gray-100 dark:bg-gray-700 rounded-lg'>
+                  <div className='h-5 w-5 rounded-full bg-gray-800 dark:bg-gray-200'></div>
+                </div>
+                <div>
+                  <h3 className='text-lg font-semibold text-gray-800 dark:text-gray-200'>
+                    Upgrade to Pro
+                  </h3>
+                  <p className='text-gray-700 dark:text-gray-300 mt-1'>
+                    You have {userPlan.remaining_tasks} tasks remaining. Upgrade
+                    to Pro for unlimited tasks!
+                  </p>
+                </div>
               </div>
-              <div>
-                <h3 className='text-lg font-semibold text-gray-800 dark:text-gray-200'>
-                  Upgrade to Pro
-                </h3>
-                <p className='text-gray-700 dark:text-gray-300 mt-1'>
-                  You have {userPlan.remaining_tasks} tasks remaining. Upgrade
-                  to Pro for unlimited tasks!
-                </p>
-              </div>
+              <button
+                onClick={() => setShowUpgradeDialog(true)}
+                className='bg-gray-800 dark:bg-gray-200 text-white dark:text-gray-800 px-6 py-2 rounded-lg hover:bg-gray-900 dark:hover:bg-gray-100 transition-all duration-200 shadow-lg'
+              >
+                Upgrade Now
+              </button>
             </div>
-            <button
-              onClick={() => setShowUpgradeDialog(true)}
-              className='bg-gray-800 dark:bg-gray-200 text-white dark:text-gray-800 px-6 py-2 rounded-lg hover:bg-gray-900 dark:hover:bg-gray-100 transition-all duration-200 shadow-lg'
-            >
-              Upgrade Now
-            </button>
           </div>
-        </div>
-      )}
+        )}
 
       {/* Search and Filter */}
       <div className='bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700'>
@@ -335,7 +353,7 @@ const Tasks: React.FC = () => {
             </p>
             {!searchTerm && (
               <button
-                onClick={() => setShowAddDialog(true)}
+                onClick={handleAddTaskClick}
                 className='bg-gray-800 dark:bg-gray-200 text-white dark:text-gray-800 px-6 py-3 rounded-lg hover:bg-gray-900 dark:hover:bg-gray-100 transition-all duration-200 shadow-lg'
               >
                 Add Your First Task
