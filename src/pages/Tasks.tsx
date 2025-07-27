@@ -249,6 +249,34 @@ const Tasks: React.FC = () => {
         </div>
       </div>
 
+      {/* Upgrade Banner for Free Users */}
+      {userPlan && !userPlan.is_pro && userPlan.remaining_tasks <= 2 && (
+        <div className='bg-gradient-to-r from-yellow-50 to-orange-50 border border-yellow-200 rounded-xl p-6'>
+          <div className='flex items-center justify-between'>
+            <div className='flex items-center space-x-3'>
+              <div className='p-2 bg-yellow-100 rounded-lg'>
+                <Crown className='h-5 w-5 text-yellow-600' />
+              </div>
+              <div>
+                <h3 className='text-lg font-semibold text-yellow-800'>
+                  Upgrade to Pro
+                </h3>
+                <p className='text-yellow-700 mt-1'>
+                  You have {userPlan.remaining_tasks} tasks remaining. Upgrade
+                  to Pro for unlimited tasks!
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={() => setShowUpgradeDialog(true)}
+              className='bg-gradient-to-r from-yellow-500 to-orange-500 text-white px-6 py-2 rounded-lg hover:from-yellow-600 hover:to-orange-600 transition-all duration-200 shadow-lg'
+            >
+              Upgrade Now
+            </button>
+          </div>
+        </div>
+      )}
+      
       {/* Search and Filter */}
       <div className='bg-white rounded-xl p-6 shadow-sm border border-gray-100'>
         <div className='flex flex-col sm:flex-row gap-4'>
@@ -370,33 +398,7 @@ const Tasks: React.FC = () => {
         )}
       </div>
 
-      {/* Upgrade Banner for Free Users */}
-      {userPlan && !userPlan.is_pro && userPlan.remaining_tasks <= 2 && (
-        <div className='bg-gradient-to-r from-yellow-50 to-orange-50 border border-yellow-200 rounded-xl p-6'>
-          <div className='flex items-center justify-between'>
-            <div className='flex items-center space-x-3'>
-              <div className='p-2 bg-yellow-100 rounded-lg'>
-                <Crown className='h-5 w-5 text-yellow-600' />
-              </div>
-              <div>
-                <h3 className='text-lg font-semibold text-yellow-800'>
-                  Upgrade to Pro
-                </h3>
-                <p className='text-yellow-700 mt-1'>
-                  You have {userPlan.remaining_tasks} tasks remaining. Upgrade
-                  to Pro for unlimited tasks!
-                </p>
-              </div>
-            </div>
-            <button
-              onClick={() => setShowUpgradeDialog(true)}
-              className='bg-gradient-to-r from-yellow-500 to-orange-500 text-white px-6 py-2 rounded-lg hover:from-yellow-600 hover:to-orange-600 transition-all duration-200 shadow-lg'
-            >
-              Upgrade Now
-            </button>
-          </div>
-        </div>
-      )}
+      
 
       {/* Dialogs */}
       <AddTaskDialog
