@@ -1,283 +1,437 @@
-import React, { useState, useEffect } from 'react';
-import { User, Mail, Calendar, Crown, Settings, Bell, Shield, Download, Trash2 } from 'lucide-react';
-import { apiService, UserPlan } from '../services/api';
+import React, { useState, useEffect } from "react";
+import {
+  User,
+  Mail,
+  Calendar,
+  Shield,
+  Settings,
+  Edit,
+  Save,
+  X,
+  Crown,
+  CheckCircle,
+} from "lucide-react";
+import { apiService, type UserPlan } from "../services/api";
 
 const Profile: React.FC = () => {
   const [userPlan, setUserPlan] = useState<UserPlan | null>(null);
   const [loading, setLoading] = useState(true);
-  const [user, setUser] = useState({
-    name: 'Demo User',
-    email: 'demo@example.com',
-    created_at: '2024-01-01'
+  const [isEditing, setIsEditing] = useState(false);
+  const [formData, setFormData] = useState({
+    name: "Demo User",
+    email: "demo@example.com",
+    company: "Demo Company",
+    role: "User",
   });
 
   useEffect(() => {
-    loadData();
+    const loadProfileData = async () => {
+      try {
+        setLoading(true);
+        await apiService.setupDemo();
+        const plan = await apiService.getUserPlan();
+        setUserPlan(plan);
+      } catch (error) {
+        console.error("Failed to load profile data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadProfileData();
   }, []);
 
-  const loadData = async () => {
-    try {
-      setLoading(true);
-      const planData = await apiService.getUserPlan();
-      setUserPlan(planData);
-    } catch (err) {
-      console.error('Failed to load profile data:', err);
-    } finally {
-      setLoading(false);
-    }
+  const handleSave = () => {
+    // In a real app, this would save to the backend
+    setIsEditing(false);
+  };
+
+  const handleCancel = () => {
+    setFormData({
+      name: "Demo User",
+      email: "demo@example.com",
+      company: "Demo Company",
+      role: "User",
+    });
+    setIsEditing(false);
   };
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <div className='flex items-center justify-center min-h-[60vh]'>
+        <div className='text-center'>
+          <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto'></div>
+          <p className='mt-4 text-gray-600'>Loading profile...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <div className='space-y-8'>
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className='flex items-center justify-between'>
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Profile & Settings</h1>
-          <p className="text-gray-600 mt-1">Manage your account and preferences</p>
+          <h1 className='text-3xl font-bold text-gray-900'>Profile</h1>
+          <p className='text-gray-600 mt-1'>
+            Manage your account settings and preferences
+          </p>
         </div>
+        <button
+          onClick={() => setIsEditing(!isEditing)}
+          className='flex items-center space-x-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white px-4 py-2 rounded-lg hover:from-blue-600 hover:to-purple-700 transition-all duration-200'
+        >
+          {isEditing ? <X className='h-4 w-4' /> : <Edit className='h-4 w-4' />}
+          <span>{isEditing ? "Cancel" : "Edit Profile"}</span>
+        </button>
       </div>
 
-      {/* Profile Information */}
-      <div className="bg-white rounded-lg shadow-sm p-6">
-        <h2 className="text-xl font-semibold text-gray-900 mb-6">Profile Information</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="space-y-4">
-            <div className="flex items-center space-x-3">
-              <div className="p-2 bg-blue-100 rounded-lg">
-                <User className="h-5 w-5 text-blue-600" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-gray-600">Name</p>
-                <p className="text-gray-900">{user.name}</p>
-              </div>
+      {/* Profile Card */}
+      <div className='bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden'>
+        <div className='bg-gradient-to-r from-blue-500 to-purple-600 p-8 text-white'>
+          <div className='flex items-center space-x-6'>
+            <div className='w-20 h-20 bg-white bg-opacity-20 rounded-full flex items-center justify-center'>
+              <User className='w-10 h-10' />
             </div>
-            <div className="flex items-center space-x-3">
-              <div className="p-2 bg-green-100 rounded-lg">
-                <Mail className="h-5 w-5 text-green-600" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-gray-600">Email</p>
-                <p className="text-gray-900">{user.email}</p>
-              </div>
-            </div>
-            <div className="flex items-center space-x-3">
-              <div className="p-2 bg-purple-100 rounded-lg">
-                <Calendar className="h-5 w-5 text-purple-600" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-gray-600">Member Since</p>
-                <p className="text-gray-900">{new Date(user.created_at).toLocaleDateString()}</p>
-              </div>
-            </div>
-            <div className="flex items-center space-x-3">
-              <div className="p-2 bg-yellow-100 rounded-lg">
-                <Crown className="h-5 w-5 text-yellow-600" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-gray-600">Plan</p>
-                <p className="text-gray-900">{userPlan?.is_pro ? 'Pro Plan' : 'Free Plan'}</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="space-y-4">
-            <h3 className="text-lg font-medium text-gray-900">Account Statistics</h3>
-            <div className="space-y-3">
-              <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                <span className="text-gray-700">Total Tasks</span>
-                <span className="font-medium">{userPlan?.current_tasks || 0}</span>
-              </div>
-              <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                <span className="text-gray-700">Task Limit</span>
-                <span className="font-medium">
-                  {userPlan?.is_pro ? 'Unlimited' : `${userPlan?.remaining_tasks || 0} remaining`}
-                </span>
-              </div>
-              <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                <span className="text-gray-700">Account Status</span>
-                <span className={`font-medium ${
-                  userPlan?.is_pro ? 'text-green-600' : 'text-gray-600'
-                }`}>
-                  {userPlan?.is_pro ? 'Active' : 'Free'}
+            <div className='flex-1'>
+              <h2 className='text-2xl font-bold mb-2'>{formData.name}</h2>
+              <p className='text-blue-100'>{formData.email}</p>
+              <div className='flex items-center space-x-2 mt-3'>
+                {userPlan?.is_pro ? (
+                  <Crown className='h-5 w-5 text-yellow-300' />
+                ) : (
+                  <div className='h-5 w-5 rounded-full bg-white bg-opacity-20'></div>
+                )}
+                <span className='text-sm'>
+                  {userPlan?.is_pro ? "Pro Plan" : "Free Plan"}
                 </span>
               </div>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Settings */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Preferences */}
-        <div className="bg-white rounded-lg shadow-sm p-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-6">Preferences</h2>
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <Bell className="h-5 w-5 text-gray-400" />
-                <div>
-                  <p className="font-medium text-gray-900">Email Notifications</p>
-                  <p className="text-sm text-gray-500">Receive email updates</p>
-                </div>
-              </div>
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input type="checkbox" className="sr-only peer" defaultChecked />
-                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-              </label>
-            </div>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <Settings className="h-5 w-5 text-gray-400" />
-                <div>
-                  <p className="font-medium text-gray-900">Auto-save</p>
-                  <p className="text-sm text-gray-500">Automatically save changes</p>
-                </div>
-              </div>
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input type="checkbox" className="sr-only peer" defaultChecked />
-                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-              </label>
-            </div>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <Shield className="h-5 w-5 text-gray-400" />
-                <div>
-                  <p className="font-medium text-gray-900">Two-factor Auth</p>
-                  <p className="text-sm text-gray-500">Enhanced security</p>
-                </div>
-              </div>
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input type="checkbox" className="sr-only peer" />
-                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-              </label>
-            </div>
-          </div>
-        </div>
-
-        {/* Data Management */}
-        <div className="bg-white rounded-lg shadow-sm p-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-6">Data Management</h2>
-          <div className="space-y-4">
-            <button className="w-full flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-              <div className="flex items-center space-x-3">
-                <Download className="h-5 w-5 text-blue-600" />
-                <div>
-                  <p className="font-medium text-gray-900">Export Data</p>
-                  <p className="text-sm text-gray-500">Download your tasks and data</p>
-                </div>
-              </div>
-            </button>
-            <button className="w-full flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-              <div className="flex items-center space-x-3">
-                <Settings className="h-5 w-5 text-green-600" />
-                <div>
-                  <p className="font-medium text-gray-900">Account Settings</p>
-                  <p className="text-sm text-gray-500">Manage account preferences</p>
-                </div>
-              </div>
-            </button>
-            <button className="w-full flex items-center justify-between p-4 border border-red-200 rounded-lg hover:bg-red-50 transition-colors">
-              <div className="flex items-center space-x-3">
-                <Trash2 className="h-5 w-5 text-red-600" />
-                <div>
-                  <p className="font-medium text-gray-900">Delete Account</p>
-                  <p className="text-sm text-gray-500">Permanently delete your account</p>
-                </div>
-              </div>
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Plan Information */}
-      <div className="bg-white rounded-lg shadow-sm p-6">
-        <h2 className="text-xl font-semibold text-gray-900 mb-6">Plan Information</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="text-center p-4 border border-gray-200 rounded-lg">
-            <div className="flex items-center justify-center space-x-2 mb-2">
-              {userPlan?.is_pro ? (
-                <Crown className="h-6 w-6 text-yellow-500" />
-              ) : (
-                <div className="h-6 w-6 rounded-full bg-gray-300"></div>
-              )}
-              <h3 className="text-lg font-medium text-gray-900">
-                {userPlan?.is_pro ? 'Pro Plan' : 'Free Plan'}
+        <div className='p-8'>
+          <div className='grid grid-cols-1 md:grid-cols-2 gap-8'>
+            {/* Personal Information */}
+            <div className='space-y-6'>
+              <h3 className='text-lg font-semibold text-gray-900 mb-4'>
+                Personal Information
               </h3>
+
+              <div className='space-y-4'>
+                <div>
+                  <label className='block text-sm font-medium text-gray-700 mb-2'>
+                    Full Name
+                  </label>
+                  {isEditing ? (
+                    <input
+                      type='text'
+                      value={formData.name}
+                      onChange={(e) =>
+                        setFormData({ ...formData, name: e.target.value })
+                      }
+                      className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+                    />
+                  ) : (
+                    <div className='flex items-center space-x-3 p-3 bg-gray-50 rounded-lg'>
+                      <User className='h-5 w-5 text-gray-400' />
+                      <span className='text-gray-900'>{formData.name}</span>
+                    </div>
+                  )}
+                </div>
+
+                <div>
+                  <label className='block text-sm font-medium text-gray-700 mb-2'>
+                    Email Address
+                  </label>
+                  {isEditing ? (
+                    <input
+                      type='email'
+                      value={formData.email}
+                      onChange={(e) =>
+                        setFormData({ ...formData, email: e.target.value })
+                      }
+                      className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+                    />
+                  ) : (
+                    <div className='flex items-center space-x-3 p-3 bg-gray-50 rounded-lg'>
+                      <Mail className='h-5 w-5 text-gray-400' />
+                      <span className='text-gray-900'>{formData.email}</span>
+                    </div>
+                  )}
+                </div>
+
+                <div>
+                  <label className='block text-sm font-medium text-gray-700 mb-2'>
+                    Company
+                  </label>
+                  {isEditing ? (
+                    <input
+                      type='text'
+                      value={formData.company}
+                      onChange={(e) =>
+                        setFormData({ ...formData, company: e.target.value })
+                      }
+                      className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+                    />
+                  ) : (
+                    <div className='flex items-center space-x-3 p-3 bg-gray-50 rounded-lg'>
+                      <div className='h-5 w-5 rounded-full bg-blue-100 flex items-center justify-center'>
+                        <span className='text-xs font-medium text-blue-600'>
+                          C
+                        </span>
+                      </div>
+                      <span className='text-gray-900'>{formData.company}</span>
+                    </div>
+                  )}
+                </div>
+
+                <div>
+                  <label className='block text-sm font-medium text-gray-700 mb-2'>
+                    Role
+                  </label>
+                  {isEditing ? (
+                    <select
+                      value={formData.role}
+                      onChange={(e) =>
+                        setFormData({ ...formData, role: e.target.value })
+                      }
+                      className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+                    >
+                      <option value='User'>User</option>
+                      <option value='Admin'>Admin</option>
+                      <option value='Manager'>Manager</option>
+                    </select>
+                  ) : (
+                    <div className='flex items-center space-x-3 p-3 bg-gray-50 rounded-lg'>
+                      <Shield className='h-5 w-5 text-gray-400' />
+                      <span className='text-gray-900'>{formData.role}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {isEditing && (
+                <div className='flex space-x-3 pt-4'>
+                  <button
+                    onClick={handleSave}
+                    className='flex items-center space-x-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors'
+                  >
+                    <Save className='h-4 w-4' />
+                    <span>Save Changes</span>
+                  </button>
+                  <button
+                    onClick={handleCancel}
+                    className='flex items-center space-x-2 bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors'
+                  >
+                    <X className='h-4 w-4' />
+                    <span>Cancel</span>
+                  </button>
+                </div>
+              )}
             </div>
-            <p className="text-gray-600">
-              {userPlan?.is_pro ? 'Unlimited tasks and features' : 'Basic task management'}
-            </p>
-          </div>
-          <div className="text-center p-4 border border-gray-200 rounded-lg">
-            <h3 className="text-lg font-medium text-gray-900 mb-2">Task Usage</h3>
-            <p className="text-2xl font-bold text-gray-900">{userPlan?.current_tasks || 0}</p>
-            <p className="text-sm text-gray-600">
-              {userPlan?.is_pro ? 'of unlimited' : `of ${userPlan?.task_limit || 5}`}
-            </p>
-          </div>
-          <div className="text-center p-4 border border-gray-200 rounded-lg">
-            <h3 className="text-lg font-medium text-gray-900 mb-2">Status</h3>
-            <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
-              userPlan?.is_pro 
-                ? 'bg-green-100 text-green-800' 
-                : 'bg-gray-100 text-gray-800'
-            }`}>
-              {userPlan?.is_pro ? 'Active' : 'Free'}
-            </span>
+
+            {/* Account Information */}
+            <div className='space-y-6'>
+              <h3 className='text-lg font-semibold text-gray-900 mb-4'>
+                Account Information
+              </h3>
+
+              <div className='space-y-4'>
+                <div className='p-4 bg-blue-50 rounded-xl border border-blue-200'>
+                  <div className='flex items-center space-x-3'>
+                    <div className='p-2 bg-blue-100 rounded-lg'>
+                      <Calendar className='h-5 w-5 text-blue-600' />
+                    </div>
+                    <div>
+                      <p className='font-medium text-blue-900'>Member Since</p>
+                      <p className='text-sm text-blue-700'>January 2024</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className='p-4 bg-green-50 rounded-xl border border-green-200'>
+                  <div className='flex items-center space-x-3'>
+                    <div className='p-2 bg-green-100 rounded-lg'>
+                      <CheckCircle className='h-5 w-5 text-green-600' />
+                    </div>
+                    <div>
+                      <p className='font-medium text-green-900'>
+                        Account Status
+                      </p>
+                      <p className='text-sm text-green-700'>Active</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className='p-4 bg-purple-50 rounded-xl border border-purple-200'>
+                  <div className='flex items-center space-x-3'>
+                    <div className='p-2 bg-purple-100 rounded-lg'>
+                      <Crown className='h-5 w-5 text-purple-600' />
+                    </div>
+                    <div>
+                      <p className='font-medium text-purple-900'>
+                        Subscription
+                      </p>
+                      <p className='text-sm text-purple-700'>
+                        {userPlan?.is_pro ? "Pro Plan" : "Free Plan"}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className='p-4 bg-gray-50 rounded-xl border border-gray-200'>
+                  <div className='flex items-center space-x-3'>
+                    <div className='p-2 bg-gray-100 rounded-lg'>
+                      <Settings className='h-5 w-5 text-gray-600' />
+                    </div>
+                    <div>
+                      <p className='font-medium text-gray-900'>Preferences</p>
+                      <p className='text-sm text-gray-700'>Default settings</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Support */}
-      <div className="bg-white rounded-lg shadow-sm p-6">
-        <h2 className="text-xl font-semibold text-gray-900 mb-6">Support & Help</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="space-y-4">
-            <h3 className="text-lg font-medium text-gray-900">Get Help</h3>
-            <div className="space-y-3">
-              <a href="#" className="block p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-                <p className="font-medium text-gray-900">Documentation</p>
-                <p className="text-sm text-gray-500">Learn how to use the app</p>
-              </a>
-              <a href="#" className="block p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-                <p className="font-medium text-gray-900">Contact Support</p>
-                <p className="text-sm text-gray-500">Get help from our team</p>
-              </a>
-              <a href="#" className="block p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-                <p className="font-medium text-gray-900">FAQ</p>
-                <p className="text-sm text-gray-500">Frequently asked questions</p>
-              </a>
+      {/* Account Actions */}
+      <div className='bg-white rounded-2xl shadow-sm border border-gray-200 p-8'>
+        <h3 className='text-lg font-semibold text-gray-900 mb-6'>
+          Account Actions
+        </h3>
+        <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+          <button className='flex items-center justify-between p-4 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors'>
+            <div className='flex items-center space-x-3'>
+              <div className='p-2 bg-blue-100 rounded-lg'>
+                <Shield className='h-5 w-5 text-blue-600' />
+              </div>
+              <div>
+                <p className='font-medium text-gray-900'>Change Password</p>
+                <p className='text-sm text-gray-600'>Update your password</p>
+              </div>
             </div>
-          </div>
-          <div className="space-y-4">
-            <h3 className="text-lg font-medium text-gray-900">Account Actions</h3>
-            <div className="space-y-3">
-              <button className="w-full text-left p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-                <p className="font-medium text-gray-900">Change Password</p>
-                <p className="text-sm text-gray-500">Update your password</p>
-              </button>
-              <button className="w-full text-left p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-                <p className="font-medium text-gray-900">Privacy Settings</p>
-                <p className="text-sm text-gray-500">Manage your privacy</p>
-              </button>
-              <button className="w-full text-left p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-                <p className="font-medium text-gray-900">API Access</p>
-                <p className="text-sm text-gray-500">Manage API keys</p>
-              </button>
+            <div className='text-gray-400'>
+              <svg
+                className='w-5 h-5'
+                fill='none'
+                stroke='currentColor'
+                viewBox='0 0 24 24'
+              >
+                <path
+                  strokeLinecap='round'
+                  strokeLinejoin='round'
+                  strokeWidth={2}
+                  d='M9 5l7 7-7 7'
+                />
+              </svg>
             </div>
-          </div>
+          </button>
+
+          <button className='flex items-center justify-between p-4 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors'>
+            <div className='flex items-center space-x-3'>
+              <div className='p-2 bg-orange-100 rounded-lg'>
+                <Settings className='h-5 w-5 text-orange-600' />
+              </div>
+              <div>
+                <p className='font-medium text-gray-900'>
+                  Notification Settings
+                </p>
+                <p className='text-sm text-gray-600'>
+                  Manage your notifications
+                </p>
+              </div>
+            </div>
+            <div className='text-gray-400'>
+              <svg
+                className='w-5 h-5'
+                fill='none'
+                stroke='currentColor'
+                viewBox='0 0 24 24'
+              >
+                <path
+                  strokeLinecap='round'
+                  strokeLinejoin='round'
+                  strokeWidth={2}
+                  d='M9 5l7 7-7 7'
+                />
+              </svg>
+            </div>
+          </button>
+
+          <button className='flex items-center justify-between p-4 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors'>
+            <div className='flex items-center space-x-3'>
+              <div className='p-2 bg-green-100 rounded-lg'>
+                <User className='h-5 w-5 text-green-600' />
+              </div>
+              <div>
+                <p className='font-medium text-gray-900'>Privacy Settings</p>
+                <p className='text-sm text-gray-600'>Manage your privacy</p>
+              </div>
+            </div>
+            <div className='text-gray-400'>
+              <svg
+                className='w-5 h-5'
+                fill='none'
+                stroke='currentColor'
+                viewBox='0 0 24 24'
+              >
+                <path
+                  strokeLinecap='round'
+                  strokeLinejoin='round'
+                  strokeWidth={2}
+                  d='M9 5l7 7-7 7'
+                />
+              </svg>
+            </div>
+          </button>
+
+          <button className='flex items-center justify-between p-4 border border-red-200 rounded-xl hover:bg-red-50 transition-colors'>
+            <div className='flex items-center space-x-3'>
+              <div className='p-2 bg-red-100 rounded-lg'>
+                <svg
+                  className='h-5 w-5 text-red-600'
+                  fill='none'
+                  stroke='currentColor'
+                  viewBox='0 0 24 24'
+                >
+                  <path
+                    strokeLinecap='round'
+                    strokeLinejoin='round'
+                    strokeWidth={2}
+                    d='M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16'
+                  />
+                </svg>
+              </div>
+              <div>
+                <p className='font-medium text-gray-900'>Delete Account</p>
+                <p className='text-sm text-gray-600'>
+                  Permanently delete your account
+                </p>
+              </div>
+            </div>
+            <div className='text-gray-400'>
+              <svg
+                className='w-5 h-5'
+                fill='none'
+                stroke='currentColor'
+                viewBox='0 0 24 24'
+              >
+                <path
+                  strokeLinecap='round'
+                  strokeLinejoin='round'
+                  strokeWidth={2}
+                  d='M9 5l7 7-7 7'
+                />
+              </svg>
+            </div>
+          </button>
         </div>
       </div>
     </div>
   );
 };
 
-export default Profile; 
+export default Profile;
