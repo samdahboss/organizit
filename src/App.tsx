@@ -1,7 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Layout from "./components/Layout";
 import Tasks from "./pages/Tasks";
-import { DarkModeProvider } from "./contexts/DarkModeContext";
+import { DarkModeProvider } from "./contexts/DarkModeContext.tsx";
 
 import "./index.css";
 

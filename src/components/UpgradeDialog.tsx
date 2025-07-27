@@ -17,30 +17,46 @@ const UpgradeDialog: React.FC<UpgradeDialogProps> = ({
   const [step, setStep] = useState<
     "initial" | "processing" | "success" | "error"
   >("initial");
-  // const [paymentUrl, setPaymentUrl] = useState<string>("");
   const [error, setError] = useState<string>("");
 
   const handleInitializePayment = async () => {
     try {
       setStep("processing");
       const response = await apiService.initializePayment();
-      // setPaymentUrl(response.payment_url);
 
-      // Simulate payment verification after a delay
-      setTimeout(async () => {
+      // Redirect to Flutterwave payment page
+      window.open(response.payment_url, "_blank");
+
+      // Start polling for payment verification
+      const pollInterval = setInterval(async () => {
         try {
-          await apiService.verifyPayment(response.payment_reference);
-          setStep("success");
-          setTimeout(() => {
-            onSuccess();
-            handleClose();
-          }, 2000);
-        } catch (error) {
-          setStep("error");
-          setError("Payment verification failed. Please try again.");
-          console.error("Payment verification error:", error);
+          const verificationResponse = await apiService.verifyPayment(
+            response.payment_reference
+          );
+          if (verificationResponse.is_pro) {
+            clearInterval(pollInterval);
+            setStep("success");
+            setTimeout(() => {
+              onSuccess();
+              handleClose();
+            }, 2000);
+          }
+        } catch (verificationError) {
+          // Payment not yet completed, continue polling
+          console.log("Payment still pending...", verificationError);
         }
       }, 3000);
+
+      // Stop polling after 5 minutes
+      setTimeout(() => {
+        clearInterval(pollInterval);
+        if (step === "processing") {
+          setStep("error");
+          setError(
+            "Payment verification timeout. Please try again or contact support."
+          );
+        }
+      }, 300000);
     } catch (err) {
       setStep("error");
       setError("Failed to initialize payment. Please try again.");
@@ -67,12 +83,13 @@ const UpgradeDialog: React.FC<UpgradeDialogProps> = ({
               Processing Payment
             </h3>
             <p className='text-gray-600 dark:text-gray-400'>
-              Please wait while we process your payment...
+              Complete your payment in the Flutterwave window to upgrade...
             </p>
             <div className='mt-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg'>
               <p className='text-sm text-gray-700 dark:text-gray-300'>
-                This is a mock payment. In a real application, you would be
-                redirected to a payment gateway.
+                You have been redirected to Flutterwave to complete your
+                payment. This window will update automatically once payment is
+                confirmed.
               </p>
             </div>
           </div>
@@ -169,7 +186,7 @@ const UpgradeDialog: React.FC<UpgradeDialogProps> = ({
                   </div>
                   <div className='text-right'>
                     <p className='text-2xl font-bold text-gray-900 dark:text-gray-100'>
-                      N2000
+                      ₦2,000
                     </p>
                     <p className='text-xs text-gray-600 dark:text-gray-400'>
                       NGN
@@ -196,7 +213,8 @@ const UpgradeDialog: React.FC<UpgradeDialogProps> = ({
 
             <div className='mt-4 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg'>
               <p className='text-xs text-gray-500 dark:text-gray-400 text-center'>
-                This is a demo payment. No real charges will be made.
+                Secure payment powered by Flutterwave. Test mode - no real
+                charges will be made.
               </p>
             </div>
           </>
